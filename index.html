@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Math and Music</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="container1">
+        <h1 id="pagetitle">
+            Kian's Tone Generator
+        </h1>
+        <div class="inputsrow">
+            <div class="inputcontainer">
+                <h4>Wave Shape</h4>
+                <div class="wss-options-container">
+                    <div id="wsssine" class="wss-option wss-selected" onclick="wssClicked('sine')">
+                        <svg width="181" height="120" viewBox="0 0 180 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 60C38.1942 6.3186 56.8063 7.00708 90 60C126.496 119.874 144.51 117.551 173 60"/>
+</svg>
+                    </div>
+                    <div class="wss-option" id="wsssawtooth" onclick="wssClicked('sawtooth')">
+                        <svg width="181" height="120" viewBox="0 0 181 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 59L93 19V103L172 59"/>
+</svg>
+                    </div>
+                    <div class="wss-option" id="wsstriangle" onclick="wssClicked('triangle')">
+                        <svg width="181" height="120" viewBox="0 0 181 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 59L48 19L132 104L173 59"/>
+</svg></div>
+                    <div class="wss-option" id="wsssquare" onclick="wssClicked('square')">
+                    <svg width="181" height="120" viewBox="0 0 181 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 59V22H91V98H171V59"/>
+</svg>
+                </div>
+                </div>
+            </div>
+            <div class="inputcontainer">
+                <h4>Frequency</h4><div>
+                <input type="number" id="frequencyinput"
+               min="1" max="10000" value=440>Hz</div>
+            </div>
+            <div class="inputcontainer"><h4>Gain Multiplier</h4><div>
+                <input type="number" id="gaininput"
+               min="0" max="2" step="0.01" value=0.5>x</div></div>
+        </div>
+        <button id="playbutton">Play</button>
+    </div>
+    
+  <script src="script.js"></script>
+</body>
+</html>
