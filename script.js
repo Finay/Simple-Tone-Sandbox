@@ -1,69 +1,123 @@
-// AudioContext creation
-let ac = new AudioContext();
-let gn = ac.createGain();
-gn.gain.value = 0.5;
-let currGain = gn.gain.value;
-var o = ac.createOscillator();
-o.type = "sine";
-o.connect(gn);
-gn.connect(ac.destination);
-o.start();
+// Elements for frequency table
+let addbutton = document.getElementById("addfreq");
+let freqtable = document.getElementById("freqtable");
 
-ac.suspend();
+// Create Oscillator/Gain pair object list
+var oscs = [];
 
-let playbutton = document.getElementById("playbutton");
 var playing = false;
 
 function playPause(){
-    if (playing) {ac.resume(); playbutton.textContent = "Stop";}
-    else {ac.suspend(); playbutton.textContent = "Play";}
+    if (playing) {
+        for (var i = 0; i < oscs.length; i++){
+            oscs[i].start(); 
+        }
+        playbutton.textContent = "Stop";
+    }
+    else {
+        for (var i = 0; i < oscs.length; i++){
+            oscs[i].stop(); 
+        }
+        playbutton.textContent = "Play";
+    }
     playing = !playing;
 }
 
-playbutton.addEventListener("click", playPause);
-
-document.addEventListener('keyup', event => {
-  if (event.code === 'Space') {
-    playPause();
-  }
-})
-
-let frequencyinput = document.getElementById("frequencyinput");
-
-frequencyinput.addEventListener("input", function(e){
-    o.frequency.value = e.target.value;
-})
-
-function setFreq(freq){
-    o.frequency.value = freq;
-    frequencyinput.value = Math.round(freq * 100)/100;
-}
-
-let gaininput = document.getElementById("gaininput");
-
-gaininput.addEventListener("input", function(e){
-    gn.gain.value = e.target.value;
-})
-
+// Wave changer (All Oscillators)
 function wssClicked(wave){
-    o.type = wave;
+    for (var i = 0; i<oscs.length; i++) oscs[i].type = wave;
     let waves = ["sine", "square", "triangle", "sawtooth"];
     for (var i = 0; i < 4; i++){document.getElementById("wss"+waves[i]).classList.remove("wss-selected")};
     document.getElementById("wss"+wave).classList.add("wss-selected");
 }
 
-function playFreqSeries(freqs, times){
-    for (var i = 0; i < freqs.length; i++){
-        setTimeout(setFreq, times[i], freqs[i]);
-    }
+// Make new Oscillator
+function makeOsc(freq=440){
+    var osc = new Tone.Oscillator(freq, "sine").toDestination();
+
+    return osc;
 }
 
-function freqInc(start, multiplier, duration, count, delay=0){
-    setTimeout(function(){ac.resume(); playbutton.textContent = "Stop";}, delay);
-    freq = start;
-    var i;
-    for (i = 0; i < count; i++){
-        setTimeout(setFreq, delay + duration*i, freq);
-        freq *= multiplier;
-    }
+// Update frequency in oscillator
+function freqUpdate(e) {
+    let targetRow = e.target.parentElement.parentElement;
+    let tableItems = freqtable.children;
+    var targetIndex;
+    
+    for (var i = 0; i < tableItems.length; i++) {
+        if (tableItems[i] == targetRow) {targetIndex = i; break}}
+    targetIndex--;
+
+    oscs[targetIndex].frequency.value = e.target.value;
 }
+
+// Update gain in oscillator
+function gainUpdate(e) {
+    let targetRow = e.target.parentElement.parentElement;
+    let tableItems = freqtable.children;
+    var targetIndex;
+    
+    for (var i = 0; i < tableItems.length; i++) {
+        if (tableItems[i] == targetRow) {targetIndex = i; break}}
+    targetIndex--;
+
+    oscs[targetIndex].volume.value = e.target.value;
+}
+
+// Create new frequency row
+function newFR(){
+    let elem = document.createElement("div");
+    elem.className = "freqrow";
+    elem.innerHTML = '<div class="frremove"><h1 onclick="removeFR(event)"><span>-</span><span>Remove?</span></h1></div><div><input oninput="gainUpdate(event)" type="number" id="gaininput" min="0" max="2" step="0.01" value=1>x</div><div><input type="number" oninput="freqUpdate(event)" id="frequencyinput" min="1" max="10000" value=440>Hz</div>'
+    return elem;
+}
+
+// Add new frequency row to table
+function addFR(){
+    freqtable.insertBefore(newFR(), addbutton);
+    o = makeOsc();
+    o.start();
+    oscs.push(o);
+}
+
+// Remove frequency row from table
+function removeFR(e){
+    let targetRow = e.target.parentElement.parentElement.parentElement;
+    let tableItems = freqtable.children;
+    var targetIndex;
+    
+    for (var i = 0; i < tableItems.length; i++) {
+        if (tableItems[i] == targetRow) {targetIndex = i; break}
+    }
+    targetIndex--;
+
+    oscs[targetIndex].stop();
+    oscs[targetIndex].dispose();
+    oscs.splice(targetIndex, 1);
+    
+    targetRow.style.height = "50px";
+    targetRow.style.opacity = "1";
+    targetRow.style.animation = "shrink 0.5s forwards ease";
+    setTimeout(function(){targetRow.remove()}, 500);
+}
+
+window.addEventListener('load', (event) => {
+    // Initial oscillator
+    let o = makeOsc();
+    o.start();
+    oscs.push(o);
+    
+    // Run addFR() when addbutton pressed
+    addbutton.addEventListener("click", addFR);
+    
+    // Play and Stop
+    let playbutton = document.getElementById("playbutton");
+    
+    playbutton.addEventListener("click", playPause);
+    
+    document.addEventListener('keyup', event => {
+      if (event.code === 'Space') {
+        playPause();
+      }
+    })
+});
